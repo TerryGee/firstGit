@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="resmaster" basedir="." default="package-war">
+	 <property file="build.properties"/>
+	 <property name="dist" value="dist"/>
+	<property name="web" value="Web"/>
+	<property name="src" value="src"/>
+	<property name="config" value="config"/>
+	<path id="lib.classpath">
+			<fileset dir="${web}/WEB-INF/lib">
+				<include name="**/*.jar"/>
+			</fileset>    	
+	    </path>
+	 <property name="build.classes" value="${web}/WEB-INF/classes"/>
+	<!-- Check timestamp on files -->
+	<target name="prepare" depends="clean">
+		<tstamp>
+			<format property="build.time" pattern="yyyyMMdd"/>
+		</tstamp>
+		<tstamp>
+			<format property="copyright.year" pattern="yyyy"/>
+		</tstamp>
+	<!--	<property name="webapp.war" value="${webapp.name}-${webapp.version}-${build.time}.war"/> -->
+		<mkdir dir="${build.classes}"/>
+		<mkdir dir="${dist}"/>
+	</target>
+
+	<target name="compile" depends="prepare">
+		<javac srcdir="${src}"
+           destdir="${build.classes}" 
+			     debug="${compile.debug}"
+           deprecation="${compile.deprecation}" 
+			     optimize="${compile.optimize}"
+			     source="${compile.source}"
+			     target="${compile.target}"
+        	 encoding="${compile.encoding}"
+           classpathref="lib.classpath">
+		</javac>
+		<copy todir="${build.classes}">
+					<fileset dir="${src}">
+						<include name="**/*.properties"/>
+						<include name="**/*.xml"/>
+						<exclude name="*.scc"/>
+					</fileset>
+		</copy>
+		<copy todir="${build.classes}" >
+            <fileset dir="${config}">
+              <include name="**/*.xml" />
+              <include name="**/*.properties" />
+			  <include name="**/*.xsd" />
+              <exclude name="*.log" />
+            </fileset>
+        </copy>
+	</target>
+
+	<target name="package-war" depends="compile" description="Package WAR">
+		<!-- webapp.war -->
+		<war destfile="${dist}/EOMS.war" duplicate="fail" webxml="${web}/WEB-INF/web.xml" compress="true">
+			<fileset dir="${web}">
+				<!-- exclude name="WEB-INF/classes/**"/> -->
+				<exclude name="**/web.xml"/>
+				<exclude name="**/*.EXAMPLE"/>
+				<exclude name="**/*.README"/>
+				<exclude name="WEB-INF/testContext-*.xml"/>
+			</fileset>			
+			<fileset dir="." file="*.txt"/>
+		</war>
+		<echo>package-war  successfully!</echo>
+	</target>
+
+	<!-- Remove generated files for clean build -->
+	<target name="clean" description="Removes build artifacts">
+		<echo level="info">Cleaning build and distribution directories</echo>
+		
+		<!--delete dir="${build.classes}"/-->
+		<delete dir="${dist}"/>
+		<delete file="${web}/WEB-INF/tld/${webapp.name}.tld"/>
+	</target>
+</project>
